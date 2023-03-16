@@ -4,6 +4,7 @@ import SearchBar from "../SearchBar/SearchBar";
 import SearchResults from "../SearchResults/SearchResults";
 import Playlist from "../Playlist/Playlist";
 import Spotify from "../../util/Spotify";
+import Loading from "../Loading/Loading.js";
 
 class App extends React.Component {
   constructor(props) {
@@ -13,6 +14,8 @@ class App extends React.Component {
       searchResults: [],
       playlistName: "My Playlist",
       playlistTracks: [],
+      loading: false,
+      showSaveMessage: false,
     };
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
@@ -43,11 +46,18 @@ class App extends React.Component {
 
   savePlaylist() {
     const trackUris = this.state.playlistTracks.map((track) => track.uri);
+    this.setState({ loading: true });
     Spotify.savePlaylist(this.state.playlistName, trackUris).then(() => {
       this.setState({
         playlistName: "New Playlist",
         playlistTracks: [],
       });
+      // alert("Songs have been saved.");
+      this.setState({ showSaveMessage: true });
+      setTimeout(() => {
+        this.setState({ showSaveMessage: false });
+      }, 2500);
+      this.setState({ loading: false });
     });
   }
 
@@ -65,6 +75,12 @@ class App extends React.Component {
         </h1>
         <div className="App">
           <SearchBar onSearch={this.search} />
+          {this.state.loading && <Loading />}
+          {this.state.showSaveMessage && (
+            <div className="saved-message">
+              <h3>Playlist Saved!</h3>
+            </div>
+          )}
           <div className="App-playlist">
             <SearchResults
               searchResults={this.state.searchResults}
